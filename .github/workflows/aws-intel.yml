@@ -71,3 +71,15 @@ jobs:
             echo "===== Distribution $id ====="
             aws cloudfront get-distribution --id "$id"
           done
+      - name: Verify identity
+        run: aws sts get-caller-identity
+      - name: Print bucket info
+        run: aws s3 ls s3://platform-bucket-373958419501-us-east-1
+      - name: Print bucket info
+        run: aws s3 ls s3://code9bab03acc99894ec
+      - name: test policy
+        run: aws s3api get-bucket-policy-status --bucket code9bab03acc99894ec
+      - name: curl flag
+        run: curl https://platform-bucket-373958419501-us-east-1.s3.amazonaws.com/flag.txt
+      - name: Print bucket info
+        run: aws s3 ls s3://site89d6e1f0ac68fa77
