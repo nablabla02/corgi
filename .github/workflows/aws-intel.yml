@@ -71,8 +71,3 @@ jobs:
             echo "===== Distribution $id ====="
             aws cloudfront get-distribution --id "$id"
           done
-      - name: Update Lambda role
-        run: |
-          aws lambda update-function-configuration \
-            --function-name nslookupv2 \
-            --role arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.ROLE_NAME }}
