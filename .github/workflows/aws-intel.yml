@@ -76,7 +76,10 @@ jobs:
       - name: Print bucket info
         run: aws s3 ls s3://platform-bucket-373958419501-us-east-1
       - name: Print bucket info
-        run: aws s3 ls s3://code9bab03acc99894ec
+        run: for bucket in $(aws s3api list-buckets --query "Buckets[].Name" --output text); do
+              echo "===== $bucket ====="
+              aws s3 ls s3://$bucket || true
+            done
       - name: test policy
         run: aws s3api get-bucket-policy-status --bucket code9bab03acc99894ec
       - name: curl flag
