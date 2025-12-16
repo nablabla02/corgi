@@ -11,8 +11,8 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  ACCOUNT_ID: "PUT_ACCOUNT_ID_HERE"
-  ROLE_NAME: "PUT_CICD_ROLE_NAME_HERE"
+  ACCOUNT_ID: "373958419501"
+  ROLE_NAME: "cicdRolePolicy"
 
 jobs:
   intel:
